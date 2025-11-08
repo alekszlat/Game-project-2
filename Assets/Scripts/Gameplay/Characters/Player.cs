@@ -3,8 +3,8 @@ using UnityEngine;
 public class Player : Character<Player>
 {
     //Monobehavior class that keeps track of the player input
-    public PlayerInputHandler playerInputHandler;
-
+    public PlayerInputServece playerInputHandler;
+    
     //Diffrent player states
     public PlayerIdleState playerIdleState = new PlayerIdleState();
     public PlayerMovingState playerMovingState = new PlayerMovingState();
@@ -14,7 +14,7 @@ public class Player : Character<Player>
     {
         base.Start();
         SetSpeed(6);
-        playerInputHandler = GetComponent<PlayerInputHandler>();
+        playerInputHandler = GetComponent<PlayerInputServece>();
         SetState(playerIdleState);
 
     }

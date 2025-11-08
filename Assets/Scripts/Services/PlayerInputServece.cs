@@ -1,12 +1,11 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerInputHandler : MonoBehaviour
+public class PlayerInputServece : MonoBehaviour
 {
     private PlayerInput playerInput;
     private Vector2 moveDir;
 
-  
     void Awake()
     {
         playerInput = new PlayerInput();
@@ -17,22 +16,19 @@ public class PlayerInputHandler : MonoBehaviour
         moveDir = Vector2.zero;
     }
 
-
     private void OnEnable()
     {
-        playerInput.Default.Movement.performed += OnMovement;
+        playerInput.Default.Movement.performed += GetMovement;
         playerInput.Default.testButton.started += OnTestButton;
-
-
     }
     private void OnDisable()
     {
         playerInput.Default.Disable();
         playerInput.Default.Movement.started -= OnTestButton;
-        playerInput.Default.Movement.performed -= OnMovement;
+        playerInput.Default.Movement.performed -= GetMovement;
 
     }
-    public void OnMovement(InputAction.CallbackContext callback)
+    public void GetMovement(InputAction.CallbackContext callback)
     {
         moveDir = callback.ReadValue<Vector2>();
     }
