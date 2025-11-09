@@ -1,7 +1,10 @@
+using NUnit.Framework;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class PlayerIdleState : GroundedState
 {
+    private TimerUtil playerIdleStateTimer = new TimerUtil(0.1f, true);
     public override void Enter(Player stateController)
     {
         //base.Enter(stateController);
@@ -19,11 +22,17 @@ public class PlayerIdleState : GroundedState
         base.FixedUpdate(stateController);
       
     }
-    //TODO add a timer to cooldown for switching classes
+    
     public override void Update(Player stateController)
     {
+        
+       
         base.Update(stateController);
-        if (stateController.playerInputHandler.GetDirection() != Vector2.zero)
+
+
+        //Switching Sprite Sheet based on the direction
+        bool hasStartedMoving = stateController.GetMoveDir() != Vector2.zero;
+        if (hasStartedMoving && playerIdleStateTimer.UpdateTimer(Time.deltaTime))
         {
             stateController.SwitchState(stateController.playerMovingState,stateController);
         }

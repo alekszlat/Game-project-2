@@ -1,10 +1,13 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 public class PlayerMovingState : GroundedState
 {
+    private TimerUtil playerMovingStateTimer = new TimerUtil(0.1f, true);
     public override void Enter(Player stateController)
     {
+      
         base.Enter(stateController);
         Debug.Log("MOVING state");
     }
@@ -21,13 +24,21 @@ public class PlayerMovingState : GroundedState
 
     }
 
+    //TODO add a timer to cooldown for switching classes
+
     public override void Update(Player stateController)
     {
-       // base.Update(stateController);
-        
-        if (stateController.GetMoveDir() == Vector2.zero)
+  
+        base.Update(stateController);
+        //Switching player movement Animations
+
+
+        //If player has stopped moving and a small period has passed he goes into idle
+
+        bool hasStopped = stateController.GetMoveDir() == Vector2.zero;
+        if (hasStopped && playerMovingStateTimer.UpdateTimer(Time.deltaTime))
         {
-            stateController.SwitchState(stateController.playerIdleState,stateController);
+            stateController.SwitchState(stateController.playerIdleState, stateController);
         }
     }
 }
