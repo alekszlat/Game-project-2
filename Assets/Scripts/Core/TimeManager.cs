@@ -1,4 +1,6 @@
 using System;
+using Game.Core.EventSystem;
+using Game.Core.GameSystem;
 using UnityEngine;
 
 /// <summary>
@@ -78,19 +80,28 @@ namespace Game.Core.TimeSystem
     {
         public float RemainingTime { get; private set; }
         public bool IsPaused { get; private set; }
+        private bool dayEnded;
 
         public TimeManagerCore(float startTime)
         {
             RemainingTime = startTime;
+            dayEnded = false;
         }
 
         public void Tick(float deltaTime)
         {
-            if (IsPaused) return;
+            if (IsPaused || dayEnded) return;
 
             RemainingTime -= deltaTime;
-            if (RemainingTime < 0f)
-                RemainingTime = 0f;
+            if (RemainingTime > 0f) return;
+
+            RemainingTime = 0;
+            dayEnded = true;
+            EventManager.Instance.Publish(new OnDayEndEvent
+            {
+                DayNumber = 1,
+                TasksCompleted = 0
+            });
         }
 
         public void AddTime(float seconds)
@@ -106,6 +117,7 @@ namespace Game.Core.TimeSystem
         public void Reset(float startTime)
         {
             RemainingTime = startTime;
+            dayEnded = false;
         }
 
         public void Pause() => IsPaused = true;
