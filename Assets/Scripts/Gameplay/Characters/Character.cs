@@ -6,38 +6,31 @@ using UnityEngine;
 public abstract class Character<T> : MonoBehaviour
 {
     private Rigidbody2D rb;
-    private Vector2 moveDir;//direction currently moving towords
-    private Vector2 lastMoveDir;//last direction we were moving in
+    private Vector2 inputMoveDir;//direction currently moving towords,contrlled by input
+    private Vector2 lookDir;//last direction we were moving in
     private float speed;
     private State<T> currentState;//needs a template for each class that extends character: state for Player,for passiveNPC,for agressiveNpc
-
-
-    private AnimationControllerUtil animationController = new AnimationControllerUtil();//class that handles animation,needs lists with sprites
-
+    private Animator animator;
     private SpriteRenderer spriteRenderer;
+  
     //is virtual so we can intialize rb
     public virtual void Start()
     {
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-        lastMoveDir = Vector2.down;
-     
-      
+        lookDir = Vector2.left;
+        animator = GetComponent<Animator>();
+
+       
     }
-    //Updates animation controller in every state
+  
     public virtual void Update()
     {
-        animationController.UpdateAnimationController(Time.deltaTime);
-
-        //Initialized Sprite renderer and changes current sprite
-        if (animationController.HasSprites())
-        {
-            spriteRenderer.sprite = animationController.GetSprite();
-        }
+        
     }
 
     //switches between states, it needs a new state,state needs its controller as a paramater so it can acess it, and we need the controller
-    //when we switch states, we do the Exit function on the current one, switcht o the new one and start the Enter function.
+    //when we switch states, we do the Exit function on the current one, switch to the new one and start the Enter function.
     
     public void SwitchState(State<T> state, T stateController)
     {
@@ -71,25 +64,29 @@ public abstract class Character<T> : MonoBehaviour
     //Helper functions
     public void Movement()
     {
-        if (moveDir != Vector2.zero)
+        if (inputMoveDir != Vector2.zero)
         {
-            lastMoveDir = moveDir;
+            lookDir = inputMoveDir;
         }
-        rb.linearVelocity = moveDir * speed;
+        rb.linearVelocity = inputMoveDir * speed;
     }
 
     //Geters and Setters
+    public Animator GetAnimator()
+    {
+        return animator;
+    }
     public State<T> getCurrentState()
     {
         return currentState;
     }
-    public Vector2 GetMoveDir()
+    public Vector2 GetInputMoveDir()
     {
-        return moveDir;
+        return inputMoveDir;
     }
-    public void SetMoveDir(Vector2 moveDir)
+    public void SetInputMoveDir(Vector2 moveDir)
     {
-        this.moveDir = moveDir;
+        this.inputMoveDir = moveDir;
     }
     public void SetSpeed(float speed)
     {
@@ -99,14 +96,10 @@ public abstract class Character<T> : MonoBehaviour
     {
         spriteRenderer.sprite = currentSprite;
     }
-    public AnimationControllerUtil GetAnimationController()
-    {
-        return animationController;
-    }
  
-    public Vector2 GetLastMoveDir()
+    public Vector2 GetLookDir()
     {
-        return lastMoveDir;
+        return lookDir;
     }
 
 }
