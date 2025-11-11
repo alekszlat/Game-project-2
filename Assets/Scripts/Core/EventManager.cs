@@ -1,19 +1,17 @@
+/* Global event bus for the game. Handles event subscribe-publish-unsubscribe mechanism.
+ * Utilizes the Singleton pattern to ensure global access to the
+ * event mechanism and a single instance of the manager.
+ * It also uses the Publish/Subscribe pattern, implemented through generic classes,
+ * to ensure clean and scalable event bus implementation.
+ *
+ * Author: H. Hristov (milkeles)
+ * Created: 11/10/2025 (dd/mm/yyyy)
+ * Updated: 11/10/2025 (dd/mm/yyyy)
+ */
 using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-/// <summary>
-/// Handles event subscribe-unsubscribe-publish mechanism across the game.
-/// </summary>
-/// <remarks>
-/// This EventManager utilizes the <b>Singleton</b> pattern to ensure global access
-/// to the event mechanism and a single instance of the manager. 
-/// It also uses the <b>Publish/Subscribe</b> pattern, implemented through generic classes,
-/// to ensure clean and scalable event bus implementation.
-/// </remarks>
-/// <author>H. Hristov</author>
-/// <created>11/10/2025</created>
-/// <updated>11/10/2025</updated>
 namespace Game.Core.EventSystem
 {
     /// <summary>

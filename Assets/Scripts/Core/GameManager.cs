@@ -1,3 +1,11 @@
+/* Central coordinator for core systems and global events.
+ * Ensures essential managers are initialized and persists across scenes.
+ *
+ * Author: H. Hristov (milkeles)
+ * Created: 11/10/2025
+ * Updated: 11/10/2025
+ */
+
 using UnityEngine;
 using Game.Core.EventSystem;
 using Game.Core.TimeSystem;
@@ -7,6 +15,10 @@ namespace Game.Core.GameSystem
     /**********************
     * Event Declarations  *
     ***********************/
+
+    /// <summary>
+    /// Published when a day ends.
+    /// </summary>
     public class OnDayEndEvent : GameEvent
     {
         public int DayNumber { get; set; }
@@ -16,6 +28,10 @@ namespace Game.Core.GameSystem
     /**********************
     *    Event Handlers   *
     ***********************/
+
+    /// <summary>
+    /// Example handler for OnDayEndEvent.
+    /// </summary>
     public class ExampleDayEndHandler : IEventHandler<OnDayEndEvent>
     {
         public void Handle(OnDayEndEvent @event)
@@ -25,11 +41,12 @@ namespace Game.Core.GameSystem
     }
 
     /// <summary>
-    /// Coordinates initialization of core systems and global event subscriptions.
+    /// Initializes core systems and manages global event subscriptions.
     /// </summary>
-   public class GameManager : MonoBehaviour
+    public class GameManager : MonoBehaviour
     {
         private static GameManager _instance;
+
         public static GameManager Instance
         {
             get
@@ -62,9 +79,11 @@ namespace Game.Core.GameSystem
             InitializeSystems();
         }
 
+        /// <summary>
+        /// Sets up core managers and subscribes event handlers.
+        /// </summary>
         private void InitializeSystems()
         {
-            // Ensure they exist before subscribing or it bugs.
             _ = TimeManager.Instance;
             _ = EventManager.Instance;
 

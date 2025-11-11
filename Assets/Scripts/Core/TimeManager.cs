@@ -1,29 +1,25 @@
+/* Controls in-game time flow and triggers time-based events.
+ * Handles countdowns, pauses, and publishing events such as OnDayEndEvent.
+ * 
+ * Author: H. Hristov (milkeles)
+ * Created: 11/10/2025 (dd/mm/yyyy)
+ * Updated: 11/10/2025 (dd/mm/yyyy)
+ */
+
 using System;
 using Game.Core.EventSystem;
 using Game.Core.GameSystem;
 using UnityEngine;
 
-/// <summary>
-/// Manages the flow of in-game time and related time-based events.
-/// </summary>
-/// <remarks>
-/// This component follows the <b>Singleton</b> pattern to ensure that only one instance 
-/// of the <see cref="TimeManager"/> exists in the scene.
-/// <para>
-/// Responsible for tracking the passage of time, pausing, resuming, 
-/// and triggering scheduled events (e.g., day/night cycles, timed tasks).
-/// </para>
-/// </remarks>
-///
-/// Author: H. Hristov (milkeles)
-/// Created: 09/11/2025 (dd/mm/yyyy)
-/// Updated: 09/11/2025 (dd/mm/yyyy)
-/// Changelog:
 namespace Game.Core.TimeSystem
 {
+    /// <summary>
+    /// Singleton component that manages in-game time progression and timing events.
+    /// </summary>
     public class TimeManager : MonoBehaviour
     {
         private static TimeManager _instance;
+
         public static TimeManager Instance
         {
             get
@@ -68,7 +64,7 @@ namespace Game.Core.TimeSystem
             _core.Tick(Time.deltaTime);
         }
 
-        // Wrapper functions
+        // Simple wrappers for the core logic
         public void AddTime(float seconds) => _core.AddTime(seconds);
         public void SubtractTime(float seconds) => _core.SubtractTime(seconds);
         public void Pause() => _core.Pause();
@@ -76,10 +72,15 @@ namespace Game.Core.TimeSystem
         public void ResetTime() => _core.Reset(startingTime);
     }
 
+    /// <summary>
+    /// Core time logic used by the TimeManager.
+    /// Handles ticking, pausing, and triggering end-of-day events.
+    /// </summary>
     public class TimeManagerCore
     {
         public float RemainingTime { get; private set; }
         public bool IsPaused { get; private set; }
+
         private bool dayEnded;
 
         public TimeManagerCore(float startTime)
@@ -97,6 +98,7 @@ namespace Game.Core.TimeSystem
 
             RemainingTime = 0;
             dayEnded = true;
+
             EventManager.Instance.Publish(new OnDayEndEvent
             {
                 DayNumber = 1,
@@ -104,15 +106,8 @@ namespace Game.Core.TimeSystem
             });
         }
 
-        public void AddTime(float seconds)
-        {
-            RemainingTime += seconds;
-        }
-
-        public void SubtractTime(float seconds)
-        {
-            RemainingTime = Math.Max(0f, RemainingTime - seconds);
-        }
+        public void AddTime(float seconds) => RemainingTime += seconds;
+        public void SubtractTime(float seconds) => RemainingTime = Math.Max(0f, RemainingTime - seconds);
 
         public void Reset(float startTime)
         {
