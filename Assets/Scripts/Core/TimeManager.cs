@@ -28,7 +28,7 @@ namespace Game.Core.TimeSystem
             {
                 if (_instance == null)
                 {
-                    _instance = FindObjectOfType<TimeManager>();
+                    _instance = FindFirstObjectByType<TimeManager>();
                     if (_instance == null)
                     {
                         var go = new GameObject("TimeManager");

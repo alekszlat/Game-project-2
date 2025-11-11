@@ -25,7 +25,7 @@ namespace Tests.Core.TimeSystem
         [UnityTest]
         public IEnumerator TimeManager_Creates_Instance_Automatically()
         {
-            var existing = Object.FindObjectOfType<TimeManager>();
+            var existing = Object.FindFirstObjectByType<TimeManager>();
             if (existing)
                 Object.DestroyImmediate(existing.gameObject);
 
