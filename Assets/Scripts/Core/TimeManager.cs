@@ -47,16 +47,17 @@ namespace Game.Core.TimeSystem
 
         private void Awake()
         {
-            if (Instance != null && Instance != this)
+            if (_instance != null && _instance != this)
             {
                 Destroy(gameObject);
                 return;
             }
 
-            Instance = this;
+            _instance = this;
             DontDestroyOnLoad(gameObject);
 
             _core = new TimeManagerCore(startingTime);
+            _core.OnDayEnded += HandleDayEnd;
         }
 
         private void Update()
@@ -64,6 +65,14 @@ namespace Game.Core.TimeSystem
             _core.Tick(Time.deltaTime);
         }
 
+        private void HandleDayEnd()
+        {
+            EventManager.Instance.Publish(new OnDayEndEvent
+            {
+                DayNumber = 1,
+                TasksCompleted = 0
+            });
+        }
         // Simple wrappers for the core logic
         public void AddTime(float seconds) => _core.AddTime(seconds);
         public void SubtractTime(float seconds) => _core.SubtractTime(seconds);
@@ -78,6 +87,7 @@ namespace Game.Core.TimeSystem
     /// </summary>
     public class TimeManagerCore
     {
+        public event Action OnDayEnded;
         public float RemainingTime { get; private set; }
         public bool IsPaused { get; private set; }
 
@@ -98,16 +108,26 @@ namespace Game.Core.TimeSystem
 
             RemainingTime = 0;
             dayEnded = true;
-
-            EventManager.Instance.Publish(new OnDayEndEvent
-            {
-                DayNumber = 1,
-                TasksCompleted = 0
-            });
+            OnDayEnded?.Invoke();
         }
 
-        public void AddTime(float seconds) => RemainingTime += seconds;
-        public void SubtractTime(float seconds) => RemainingTime = Math.Max(0f, RemainingTime - seconds);
+        public void AddTime(float seconds)
+        {
+            if (seconds < 0f)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+            RemainingTime += seconds;
+        }
+
+        public void SubtractTime(float seconds)
+        {
+            if (seconds < 0f)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+            RemainingTime = Math.Max(0f, RemainingTime - seconds);
+        }
 
         public void Reset(float startTime)
         {
