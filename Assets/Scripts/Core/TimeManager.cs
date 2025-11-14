@@ -1,34 +1,32 @@
+/* Controls in-game time flow and triggers time-based events.
+ * Handles countdowns, pauses, and publishing events such as OnDayEndEvent.
+ * 
+ * Author: H. Hristov (milkeles)
+ * Created: 11/10/2025 (dd/mm/yyyy)
+ * Updated: 11/10/2025 (dd/mm/yyyy)
+ */
+
 using System;
+using Game.Core.EventSystem;
+using Game.Core.GameSystem;
 using UnityEngine;
 
-/// <summary>
-/// Manages the flow of in-game time and related time-based events.
-/// </summary>
-/// <remarks>
-/// This component follows the <b>Singleton</b> pattern to ensure that only one instance 
-/// of the <see cref="TimeManager"/> exists in the scene.
-/// <para>
-/// Responsible for tracking the passage of time, pausing, resuming, 
-/// and triggering scheduled events (e.g., day/night cycles, timed tasks).
-/// </para>
-/// </remarks>
-///
-/// Author: H. Hristov (milkeles)
-/// Created: 09/11/2025 (dd/mm/yyyy)
-/// Updated: 09/11/2025 (dd/mm/yyyy)
-/// Changelog:
 namespace Game.Core.TimeSystem
 {
+    /// <summary>
+    /// Singleton component that manages in-game time progression and timing events.
+    /// </summary>
     public class TimeManager : MonoBehaviour
     {
         private static TimeManager _instance;
+
         public static TimeManager Instance
         {
             get
             {
                 if (_instance == null)
                 {
-                    _instance = FindObjectOfType<TimeManager>();
+                    _instance = FindFirstObjectByType<TimeManager>();
                     if (_instance == null)
                     {
                         var go = new GameObject("TimeManager");
@@ -49,16 +47,17 @@ namespace Game.Core.TimeSystem
 
         private void Awake()
         {
-            if (Instance != null && Instance != this)
+            if (_instance != null && _instance != this)
             {
                 Destroy(gameObject);
                 return;
             }
 
-            Instance = this;
+            _instance = this;
             DontDestroyOnLoad(gameObject);
 
             _core = new TimeManagerCore(startingTime);
+            _core.OnDayEnded += HandleDayEnd;
         }
 
         private void Update()
@@ -66,7 +65,15 @@ namespace Game.Core.TimeSystem
             _core.Tick(Time.deltaTime);
         }
 
-        // Wrapper functions
+        private void HandleDayEnd()
+        {
+            EventManager.Instance.Publish(new OnDayEndEvent
+            {
+                DayNumber = 1,
+                TasksCompleted = 0
+            });
+        }
+        // Simple wrappers for the core logic
         public void AddTime(float seconds) => _core.AddTime(seconds);
         public void SubtractTime(float seconds) => _core.SubtractTime(seconds);
         public void Pause() => _core.Pause();
@@ -74,38 +81,58 @@ namespace Game.Core.TimeSystem
         public void ResetTime() => _core.Reset(startingTime);
     }
 
+    /// <summary>
+    /// Core time logic used by the TimeManager.
+    /// Handles ticking, pausing, and triggering end-of-day events.
+    /// </summary>
     public class TimeManagerCore
     {
+        public event Action OnDayEnded;
         public float RemainingTime { get; private set; }
         public bool IsPaused { get; private set; }
+
+        private bool dayEnded;
 
         public TimeManagerCore(float startTime)
         {
             RemainingTime = startTime;
+            dayEnded = false;
         }
 
         public void Tick(float deltaTime)
         {
-            if (IsPaused) return;
+            if (IsPaused || dayEnded) return;
 
             RemainingTime -= deltaTime;
-            if (RemainingTime < 0f)
-                RemainingTime = 0f;
+            if (RemainingTime > 0f) return;
+
+            RemainingTime = 0;
+            dayEnded = true;
+            OnDayEnded?.Invoke();
         }
 
         public void AddTime(float seconds)
         {
+            if (seconds < 0f)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
             RemainingTime += seconds;
         }
 
         public void SubtractTime(float seconds)
         {
+            if (seconds < 0f)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
             RemainingTime = Math.Max(0f, RemainingTime - seconds);
         }
 
         public void Reset(float startTime)
         {
             RemainingTime = startTime;
+            dayEnded = false;
         }
 
         public void Pause() => IsPaused = true;

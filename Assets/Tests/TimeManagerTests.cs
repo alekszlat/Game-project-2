@@ -15,7 +15,6 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
 using Game.Core.TimeSystem;
-using System.Reflection;
 using System.Collections;
 
 namespace Tests.Core.TimeSystem
@@ -25,7 +24,7 @@ namespace Tests.Core.TimeSystem
         [UnityTest]
         public IEnumerator TimeManager_Creates_Instance_Automatically()
         {
-            var existing = Object.FindObjectOfType<TimeManager>();
+            var existing = Object.FindFirstObjectByType<TimeManager>();
             if (existing)
                 Object.DestroyImmediate(existing.gameObject);
 
